@@ -2,15 +2,14 @@
 import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = "https://bzgqluegvremheryxkqx.supabase.co"; 
+const SUPABASE_URL = "https://supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_u7IpNiA7Ii5WqX-S_AjGQQ_fzSt0xC_";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const AVATARES = ["🐶", "🐱", "🦊", "🦁", "🤖", "🦄", "🚀", "😎"];
 
 export default function WhatsAppPro() {
-// Forzamos el tipo 'any' desde el inicio para desactivar la restricción 'never'
-const [messages, setMessages] = useState<any[]>([] as any[]);
+  const [messages, setMessages] = useState<any[]>([]);
   const = useState("");
   const [user, setUser] = useState({ name: "", avatar: "" });
   const [isRegistered, setIsRegistered] = useState(false);
@@ -60,7 +59,7 @@ const [messages, setMessages] = useState<any[]>([] as any[]);
     setIsRegistered(false);
   };
 
-  const filteredMessages = messages.filter(m => {
+  const filteredMessages = messages.filter((m: any) => {
     if (selectedChat === "Global") return !m.receiver_id;
     return (m.user_id === user.name && m.receiver_id === selectedChat) || 
            (m.user_id === selectedChat && m.receiver_id === user.name);
@@ -71,26 +70,22 @@ const [messages, setMessages] = useState<any[]>([] as any[]);
       <div style={styles.setupBg}>
         <div style={styles.setupCard}>
           <h2 style={{ color: '#075e54', marginBottom: '10px' }}>Join the Chat</h2>
-          <p style={{fontSize: '14px', color: '#666', marginBottom: '20px'}}>Please enter your details to start</p>
           <input 
             style={styles.setupInput} 
             placeholder="Your Username..." 
             value={user.name}
-            onChange={e => setUser({...user, name: e.target.value})} 
+            onChange={(e: any) => setUser({...user, name: e.target.value})} 
           />
-          <p style={{ margin: '15px 0 10px', fontWeight: 'bold' }}>Choose your Avatar:</p>
           <div style={styles.avatarGrid}>
             {AVATARES.map(a => (
               <div key={a} onClick={() => setUser({...user, avatar: a})} 
-                   style={{...styles.avatarOption, background: user.avatar === a ? '#dcf8c6' : 'transparent', border: user.avatar === a ? '2px solid #25D366' : '1px solid #eee'}}>{a}</div>
+                   style={{...styles.avatarOption, background: user.avatar === a ? '#dcf8c6' : 'transparent'}}>{a}</div>
             ))}
           </div>
           <button style={styles.setupBtn} onClick={() => { 
             if(user.name && user.avatar) {
               localStorage.setItem('chat_profile', JSON.stringify(user)); 
               setIsRegistered(true); 
-            } else {
-              alert("Please enter a name and pick an avatar");
             }
           }}>Get Started</button>
         </div>
@@ -102,43 +97,27 @@ const [messages, setMessages] = useState<any[]>([] as any[]);
     <div style={styles.appContainer}>
       <aside style={styles.sidebar}>
         <div style={styles.sidebarHeader}>Chats</div>
-        <div style={{...styles.userItem, background: selectedChat === "Global" ? '#f0f0f0' : 'transparent', fontWeight: 'bold'}} onClick={() => setSelectedChat("Global")}>🌍 Global Chat</div>
-        <div style={styles.divider}>Contacts</div>
+        <div style={{...styles.userItem, background: selectedChat === "Global" ? '#f0f0f0' : 'transparent'}} onClick={() => setSelectedChat("Global")}>🌍 Global Chat</div>
         {Array.from(activeUsers).filter(u => u !== user.name).map((u: any) => (
           <div key={u} style={{...styles.userItem, background: selectedChat === u ? '#f0f0f0' : 'transparent'}} onClick={() => setSelectedChat(u)}>👤 {u}</div>
         ))}
       </aside>
-
       <div style={styles.chatWrapper}>
         <header style={styles.header}>
-          <div style={{display: 'flex', alignItems: 'center', flex: 1}}>
-            <div style={styles.myAvatar}>{user.avatar}</div>
-            <div style={{marginLeft: '10px'}}>
-              <div style={{fontWeight: 'bold'}}>{selectedChat === "Global" ? "🌍 Global" : `🔒 ${selectedChat}`}</div>
-              <div style={{fontSize: '11px', opacity: 0.9}}>Logged as: {user.name}</div>
-            </div>
-          </div>
-          <button onClick={logout} style={styles.editBtn}>⚙️ Edit Profile</button>
+          <span>{user.avatar} {selectedChat}</span>
+          <button onClick={logout} style={styles.editBtn}>Edit Profile</button>
         </header>
-
         <main style={styles.chatArea}>
-          {filteredMessages.map((m, i) => {
-            const isMe = m.user_id === user.name;
-            return (
-              <div key={i} style={{...styles.msgWrapper, alignSelf: isMe ? 'flex-end' : 'flex-start'}}>
-                <div style={{...styles.bubble, backgroundColor: isMe ? '#e7ffdb' : '#fff'}}>
-                  {!isMe && <span style={styles.senderName}>{m.avatar_url} {m.user_id}</span>}
-                  <p style={styles.msgText}>{m.content}</p>
-                </div>
-              </div>
-            );
-          })}
+          {filteredMessages.map((m: any, i: number) => (
+            <div key={i} style={{...styles.bubble, alignSelf: m.user_id === user.name ? 'flex-end' : 'flex-start', backgroundColor: m.user_id === user.name ? '#e7ffdb' : '#fff'}}>
+              <p style={{margin: 0}}>{m.content}</p>
+            </div>
+          ))}
           <div ref={scrollRef} />
         </main>
-
         <footer style={styles.footer}>
-          <form onSubmit={enviar} style={{display: 'flex', width: '100%', gap: '10px'}}>
-            <input style={styles.input} value={text} onChange={e => setText(e.target.value)} placeholder="Type a message..." />
+          <form onSubmit={enviar} style={{display: 'flex', gap: '10px'}}>
+            <input style={styles.input} value={text} onChange={(e: any) => setText(e.target.value)} placeholder="Type..." />
             <button style={styles.sendBtn}>➤</button>
           </form>
         </footer>
@@ -148,27 +127,22 @@ const [messages, setMessages] = useState<any[]>([] as any[]);
 }
 
 const styles: any = {
-  appContainer: { display: 'flex', height: '100vh', width: '100vw', fontFamily: 'sans-serif', overflow: 'hidden' },
-  sidebar: { width: '280px', borderRight: '1px solid #ddd', background: '#fff', display: 'flex', flexDirection: 'column' },
-  sidebarHeader: { padding: '20px', fontSize: '22px', fontWeight: 'bold', color: '#075e54', borderBottom: '1px solid #eee' },
-  divider: { padding: '10px 20px', fontSize: '12px', color: '#999', background: '#fafafa', fontWeight: 'bold' },
-  userItem: { padding: '15px 20px', cursor: 'pointer', borderBottom: '1px solid #f9f9f9' },
+  appContainer: { display: 'flex', height: '100vh', width: '100vw', fontFamily: 'sans-serif' },
+  sidebar: { width: '280px', borderRight: '1px solid #ddd', background: '#fff' },
+  sidebarHeader: { padding: '20px', fontSize: '22px', fontWeight: 'bold', color: '#075e54' },
+  userItem: { padding: '15px 20px', cursor: 'pointer' },
   chatWrapper: { flex: 1, display: 'flex', flexDirection: 'column', background: '#efe7dd' },
-  header: { background: '#075e54', color: '#fff', padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' },
-  myAvatar: { width: '38px', height: '38px', borderRadius: '50%', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' },
-  editBtn: { background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', padding: '5px 12px', borderRadius: '15px', cursor: 'pointer', fontSize: '12px' },
-  chatArea: { flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column', backgroundImage: 'url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png")' },
-  msgWrapper: { display: 'flex', flexDirection: 'column', marginBottom: '8px', maxWidth: '75%' },
-  bubble: { padding: '8px 12px', borderRadius: '10px', boxShadow: '0 1px 1px rgba(0,0,0,0.1)' },
-  senderName: { fontSize: '11px', fontWeight: 'bold', color: '#075e54', display: 'block', marginBottom: '2px' },
-  msgText: { margin: '0', color: '#000000', fontSize: '15px' },
-  footer: { padding: '10px 15px', background: '#f0f0f0' },
-  input: { flex: 1, padding: '12px 18px', borderRadius: '25px', border: 'none', outline: 'none' },
-  sendBtn: { background: '#075e54', color: '#fff', border: 'none', borderRadius: '50%', width: '45px', height: '45px', cursor: 'pointer', fontSize: '18px' },
+  header: { background: '#075e54', color: '#fff', padding: '10px 20px', display: 'flex', justifyContent: 'space-between' },
+  editBtn: { background: 'none', border: '1px solid white', color: 'white', borderRadius: '5px', cursor: 'pointer' },
+  chatArea: { flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column' },
+  bubble: { padding: '8px 12px', borderRadius: '10px', marginBottom: '8px', maxWidth: '70%', boxShadow: '0 1px 1px rgba(0,0,0,0.1)' },
+  footer: { padding: '10px', background: '#f0f0f0' },
+  input: { flex: 1, padding: '10px', borderRadius: '20px', border: 'none' },
+  sendBtn: { background: '#075e54', color: '#fff', border: 'none', borderRadius: '50%', width: '40px', height: '40px', cursor: 'pointer' },
   setupBg: { height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f2f5' },
-  setupCard: { background: 'white', padding: '30px', borderRadius: '10px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)', textAlign: 'center' },
-  setupInput: { width: '100%', padding: '10px', marginBottom: '20px', borderRadius: '5px', border: '1px solid #ddd' },
-  avatarGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '10px' },
-  avatarOption: { fontSize: '24px', cursor: 'pointer', padding: '10px', borderRadius: '10px', textAlign: 'center' },
-  setupBtn: { width: '100%', padding: '12px', background: '#25d366', color: 'white', border: 'none', borderRadius: '5px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }
+  setupCard: { background: 'white', padding: '30px', borderRadius: '10px', textAlign: 'center' },
+  setupInput: { width: '100%', padding: '10px', marginBottom: '20px' },
+  avatarGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', marginBottom: '20px' },
+  avatarOption: { fontSize: '24px', cursor: 'pointer', padding: '10px' },
+  setupBtn: { width: '100%', padding: '10px', background: '#25d366', color: 'white', border: 'none', borderRadius: '5px', fontWeight: 'bold' }
 };
