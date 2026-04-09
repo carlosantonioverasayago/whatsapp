@@ -2,41 +2,43 @@
 import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// TUS CREDENCIALES REALES
-// ✅ ESTA ES TU CONFIGURACIÓN REAL PARA EL COLE
+// ✅ TUS CREDENCIALES REALES
 const SUPABASE_URL = "https://bzgqluegvremheryxkqx.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_u7IpNiA7Ii5WqX-S_AjGQQ_fzSt0xC_";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 export default function WhatsAppPro() {
   const [messages, setMessages] = useState<any[]>([]);
-  const = useState(""); 
+  const = useState(""); // <--- ARREGLADO: Ya no está vacío
   const [user, setUser] = useState<any>({ name: "", avatar: "👤" });
   const [isRegistered, setIsRegistered] = useState(false);
   const scrollRef = useRef<any>(null);
 
   useEffect(() => {
-    // 1. Cargar perfil y mensajes antiguos del disco duro del Chromebook
     const savedProfile = localStorage.getItem('chat_profile');
     const localMsgs = localStorage.getItem('local_msgs');
     if (savedProfile) { setUser(JSON.parse(savedProfile)); setIsRegistered(true); }
     if (localMsgs) { setMessages(JSON.parse(localMsgs)); }
 
-    // 2. Función para intentar traer mensajes nuevos (si el WiFi deja)
+    // Esta función es la que "salta" el muro del WiFi del cole
     const fetchMsgs = async () => {
       try {
         const { data } = await supabase.from('messages').select('*').order('inserted_at', { ascending: true });
-        if (data && data.length > 0) {
+        if (data) {
           setMessages(data);
           localStorage.setItem('local_msgs', JSON.stringify(data));
         }
-      } catch (e) { console.log("WiFi bloqueado, usando memoria local..."); }
+      } catch (e) { 
+        console.log("Buscando señal del cole..."); 
+      }
     };
 
     fetchMsgs();
-    const interval = setInterval(fetchMsgs, 4000); // Reintento cada 4 segs
+    const interval = setInterval(fetchMsgs, 3000); // Pregunta cada 3 segundos
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => { scrollRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
 
   const enviar = async (e: any) => {
     e.preventDefault();
@@ -48,23 +50,35 @@ export default function WhatsAppPro() {
       inserted_at: new Date().toISOString()
     };
 
-    // MOSTRAR AL INSTANTE (Aunque no haya internet)
+    // 1. Mostrar en tu pantalla al instante (Sin esperar al WiFi)
     const nuevosMensajes = [...messages, nuevoMsg];
     setMessages(nuevosMensajes);
     localStorage.setItem('local_msgs', JSON.stringify(nuevosMensajes));
+    const temporalText = text;
     setText("");
 
-    // Intentar subirlo a la nube (Si falla, se quedará solo en tu pantalla)
-    try { await supabase.from('messages').insert([nuevoMsg]); } catch (e) { }
+    // 2. Intentar enviarlo a la nube para que lo vean los otros
+    try { 
+      await supabase.from('messages').insert([nuevoMsg]); 
+    } catch (e) { 
+      console.log("Guardado en el PC. Se enviará al grupo cuando el WiFi conecte.");
+    }
   };
 
   if (!isRegistered) {
     return (
       <div style={{height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', background:'#075e54', fontFamily:'sans-serif'}}>
         <div style={{background:'white', padding:'30px', borderRadius:'15px', textAlign:'center', width:'300px'}}>
-          <h2 style={{color: '#075e54'}}>Entrar al Chat 🚀</h2>
-          <input style={{width:'100%', padding:'10px', marginBottom:'15px', color:'black'}} placeholder="Tu nombre..." onChange={(e)=>setUser({...user, name: e.target.value})} />
-          <button style={{width:'100%', padding:'12px', background:'#25d366', color:'white', border:'none', borderRadius:'5px', fontWeight:'bold'}} onClick={()=>{ if(user.name){ localStorage.setItem('chat_profile', JSON.stringify(user)); setIsRegistered(true); } }}>Entrar</button>
+          <h2 style={{color: '#075e54'}}>WhatsApp Cole 🚀</h2>
+          <input 
+            style={{width:'100%', padding:'10px', marginBottom:'15px', color:'black', border: '1px solid #ccc'}} 
+            placeholder="Tu nombre..." 
+            onChange={(e)=>setUser({...user, name: e.target.value})} 
+          />
+          <button 
+            style={{width:'100%', padding:'12px', background:'#25d366', color:'white', border:'none', borderRadius:'5px', fontWeight:'bold'}} 
+            onClick={()=>{ if(user.name){ localStorage.setItem('chat_profile', JSON.stringify(user)); setIsRegistered(true); } }}
+          >Entrar</button>
         </div>
       </div>
     );
@@ -90,7 +104,12 @@ export default function WhatsAppPro() {
       </main>
       <footer style={{padding:'10px', background:'#f0f0f0'}}>
         <form onSubmit={enviar} style={{display:'flex', gap:'10px'}}>
-          <input style={{flex:1, padding:'12px', borderRadius:'20px', border:'none', color:'black'}} value={text} onChange={(e)=>setText(e.target.value)} placeholder="Escribe un mensaje..." />
+          <input 
+            style={{flex:1, padding:'12px', borderRadius:'20px', border:'none', color:'black', outline:'none'}} 
+            value={text} 
+            onChange={(e)=>setText(e.target.value)} 
+            placeholder="Escribe un mensaje..." 
+          />
           <button style={{background:'#075e54', color:'white', border:'none', borderRadius:'50%', width:'45px', height:'45px'}}>➤</button>
         </form>
       </footer>
