@@ -10,14 +10,12 @@ const AVATARES = ["🐶", "🐱", "🦊", "🦁", "🤖", "🦄", "🚀", "😎"
 
 export default function WhatsAppPro() {
   const [messages, setMessages] = useState<any[]>([]);
-  const = useState(""); // <-- ASÍ ES COMO DEBE IR
-
-
-  const [user, setUser] = useState({ name: "", avatar: "" });
+  const = useState("");
+  const [user, setUser] = useState<any>({ name: "", avatar: "" });
   const [isRegistered, setIsRegistered] = useState(false);
   const [selectedChat, setSelectedChat] = useState("Global");
   const [activeUsers, setActiveUsers] = useState<any>(new Set());
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<any>(null);
 
   useEffect(() => {
     const saved = localStorage.getItem('chat_profile');
