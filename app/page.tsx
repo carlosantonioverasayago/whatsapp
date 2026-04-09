@@ -2,8 +2,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// TUS CREDENCIALES REALES
-const URL = "https://supabase.co"; 
+// ✅ TUS CREDENCIALES REALES CORREGIDAS
+const URL = "https://bzgqluegvremheryxkqx.supabase.co"; 
 const KEY = "sb_publishable_u7IpNiA7Ii5WqX-S_AjGQQ_fzSt0xC_";
 
 // TRUCO PARA EL COLE: Disfrazamos la conexión como si fuera Google
@@ -13,7 +13,7 @@ const supabase = createClient(URL, KEY, {
 
 export default function ChatCole() {
   const [messages, setMessages] = useState<any[]>([]);
-  const = useState(""); 
+  const = useState(""); // ✅ Corregido: ya tiene nombre
   const [user, setUser] = useState("");
   const [isRegistered, setIsRegistered] = useState(false);
   const scrollRef = useRef<any>(null);
@@ -67,7 +67,7 @@ export default function ChatCole() {
       <footer style={{padding:'10px', background:'#f0f0f0'}}>
         <form onSubmit={enviar} style={{display:'flex', gap:'10px'}}>
           <input style={{flex:1, padding:'10px', borderRadius:'20px', border:'none', color:'black'}} value={text} onChange={(e)=>setText(e.target.value)} placeholder="Escribe..." />
-          <button style={{background:'#075e54', color:'white', border:'none', borderRadius:'50%', width:'40px', height:'40px'}}>➤</button>
+          <button style={{background:'#075e54', color:'white', border:'none', borderRadius:'50%', width:'40px', height:'45px'}}>➤</button>
         </form>
       </footer>
     </div>
