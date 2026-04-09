@@ -2,19 +2,10 @@
 import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// TUS CREDENCIALES REALES
+// CREDENCIALES REALES CON MODO COMPATIBLE
 const SUPABASE_URL = "https://bzgqluegvremheryxkqx.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_u7IpNiA7Ii5WqX-S_AjGQQ_fzSt0xC_";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  realtime: {
-    params: {
-      eventsPerSecond: 10
-    }
-  },
-  db: {
-    schema: 'public'
-  }
-});
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const AVATARES = ["🐶", "🐱", "🦊", "🦁", "🤖", "🦄", "🚀", "😎"];
 
@@ -26,6 +17,16 @@ export default function WhatsAppPro() {
   const [selectedChat, setSelectedChat] = useState("Global");
   const [activeUsers, setActiveUsers] = useState<any>(new Set());
   const scrollRef = useRef<any>(null);
+
+  // Función para traer mensajes (se usa al cargar y al enviar)
+  const fetchMsgs = async () => {
+    const { data } = await supabase.from('messages').select('*').order('inserted_at', { ascending: true });
+    if (data) {
+      setMessages(data);
+      const users = new Set(data.map((m: any) => m.user_id));
+      setActiveUsers(users);
+    }
+  };
 
   useEffect(() => {
     const saved = localStorage.getItem('chat_profile');
@@ -39,40 +40,32 @@ export default function WhatsAppPro() {
       }
     }
 
-    const fetchMsgs = async () => {
-      const { data } = await supabase.from('messages').select('*').order('inserted_at', { ascending: true });
-      if (data) {
-        setMessages(data);
-        const users = new Set(data.map((m: any) => m.user_id));
-        setActiveUsers(users);
-      }
-    };
     fetchMsgs();
 
+    // MODO CHROMEBOOK: Preguntar por mensajes nuevos cada 3 segundos por si el tiempo real falla
+    const interval = setInterval(fetchMsgs, 3000);
+
+    // Tiempo real (si el WiFi lo permite, funcionará instantáneo)
     const channel = supabase.channel('global').on('postgres_changes', 
       { event: 'INSERT', schema: 'public', table: 'messages' }, 
-      (p) => {
-        setMessages((prev) => [...prev, p.new]);
-        setActiveUsers((prev: any) => {
-          const next = new Set(prev);
-          next.add(p.new.user_id);
-          return next;
-        });
-      }
+      () => { fetchMsgs(); }
     ).subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    return () => { 
+      supabase.removeChannel(channel);
+      clearInterval(interval);
+    };
   }, []);
 
   useEffect(() => { scrollRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, selectedChat]);
 
-   const enviar = async (e: any) => {
+  const enviar = async (e: any) => {
     e.preventDefault();
     if (!text.trim()) return;
     const msgEnviar = text;
     setText("");
     
-    // 1. Enviamos a Supabase
+    // 1. Enviar a Supabase
     await supabase.from('messages').insert([{ 
       content: msgEnviar, 
       user_id: user.name, 
@@ -80,11 +73,9 @@ export default function WhatsAppPro() {
       receiver_id: selectedChat === "Global" ? null : selectedChat
     }]);
 
-    // 2. TRUCO: Forzamos a la pantalla a mostrar el mensaje de inmediato
-    const { data } = await supabase.from('messages').select('*').order('inserted_at', { ascending: true });
-    if (data) setMessages(data);
+    // 2. Refrescar pantalla de inmediato
+    fetchMsgs();
   };
-
 
   const logout = () => {
     localStorage.removeItem('chat_profile');
@@ -145,7 +136,7 @@ export default function WhatsAppPro() {
           {filteredMessages.map((m: any, i: number) => (
             <div key={i} style={{...styles.bubble, alignSelf: m.user_id === user.name ? 'flex-end' : 'flex-start', backgroundColor: m.user_id === user.name ? '#e7ffdb' : '#fff'}}>
               <small style={{display: 'block', fontSize: '10px', color: '#888'}}>{m.user_id}</small>
-              <p style={{margin: 0, color: '#000'}}>{m.content}</p> {/* LETRAS NEGRAS EN MENSAJES */}
+              <p style={{margin: 0, color: '#000'}}>{m.content}</p>
             </div>
           ))}
           <div ref={scrollRef} />
@@ -183,7 +174,7 @@ const styles: any = {
     borderRadius: '25px', 
     border: '1px solid #ccc', 
     outline: 'none', 
-    color: '#000', // LETRAS NEGRAS AL ESCRIBIR
+    color: '#000', 
     background: '#fff' 
   },
   sendBtn: { background: '#075e54', color: '#fff', border: 'none', borderRadius: '50%', width: '45px', height: '45px', cursor: 'pointer' },
