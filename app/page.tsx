@@ -5,7 +5,16 @@ import { createClient } from '@supabase/supabase-js';
 // TUS CREDENCIALES REALES
 const SUPABASE_URL = "https://bzgqluegvremheryxkqx.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_u7IpNiA7Ii5WqX-S_AjGQQ_fzSt0xC_";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
+  },
+  db: {
+    schema: 'public'
+  }
+});
 
 const AVATARES = ["🐶", "🐱", "🦊", "🦁", "🤖", "🦄", "🚀", "😎"];
 
