@@ -10,7 +10,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const AVATARES = ["🐶", "🐱", "🦊", "🦁", "🤖", "🦄", "🍕", "🚀", "😎", "👾"];
 
 export default function WhatsAppMegaPro() {
-  // Cambiamos el tipo a any para evitar bloqueos de TypeScript
+  // Definimos como any para que Vercel no bloquee el despliegue
   const [messages, setMessages] = useState<any>([]);
   const [text, setText] = useState("");
   const [user, setUser] = useState({ name: "", avatar: "" });
@@ -29,7 +29,6 @@ export default function WhatsAppMegaPro() {
     const fetchMsgs = async () => {
       const { data } = await supabase.from('messages').select('*').order('inserted_at', { ascending: true });
       if (data) {
-        // SOLUCIÓN DEFINITIVA: Forzamos el tipo con "as any"
         setMessages(data as any);
         const users = new Set(data.map((m: any) => m.user_id));
         setActiveUsers(users);
@@ -40,7 +39,7 @@ export default function WhatsAppMegaPro() {
     const channel = supabase.channel('global').on('postgres_changes', 
       { event: 'INSERT', schema: 'public', table: 'messages' }, 
       (p) => {
-        setMessages((prev: any) => [...prev, p.new]);
+        setMessages((prev: any) => [...(prev || []), p.new]);
         setActiveUsers((prev: any) => new Set(prev).add(p.new.user_id));
       }
     ).subscribe();
@@ -72,7 +71,8 @@ export default function WhatsAppMegaPro() {
     }]);
   };
 
-  const filteredMessages = (messages as any[]).filter(m => {
+  // Filtro de seguridad para evitar el error de "never[]"
+  const filteredMessages = (Array.isArray(messages) ? messages : []).filter((m: any) => {
     if (selectedChat === "Global") return !m.receiver_id;
     return (m.user_id === user.name && m.receiver_id === selectedChat) || 
            (m.user_id === selectedChat && m.receiver_id === user.name);
