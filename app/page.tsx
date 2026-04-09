@@ -5,7 +5,12 @@ import { createClient } from '@supabase/supabase-js';
 // CREDENCIALES REALES CON MODO COMPATIBLE
 const SUPABASE_URL = "https://bzgqluegvremheryxkqx.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_u7IpNiA7Ii5WqX-S_AjGQQ_fzSt0xC_";
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: {
+    persistSession: false
+  }
+});
+
 
 const AVATARES = ["🐶", "🐱", "🦊", "🦁", "🤖", "🦄", "🚀", "😎"];
 
