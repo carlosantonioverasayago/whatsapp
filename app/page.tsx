@@ -10,7 +10,8 @@ const AVATARES = ["🐶", "🐱", "🦊", "🦁", "🤖", "🦄", "🚀", "😎"
 
 export default function WhatsAppPro() {
   const [messages, setMessages] = useState<any[]>([]);
-  const  useState(""); // <-- Aquí le damos el nombre
+  const = useState(""); // <-- ASÍ ES COMO DEBE IR
+
 
   const [user, setUser] = useState({ name: "", avatar: "" });
   const [isRegistered, setIsRegistered] = useState(false);
