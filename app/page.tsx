@@ -2,7 +2,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// Configuración con tus credenciales reales
 const SUPABASE_URL = "https://supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_u7IpNiA7Ii5WqX-S_AjGQQ_fzSt0xC_";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -11,7 +10,7 @@ const AVATARES = ["🐶", "🐱", "🦊", "🦁", "🤖", "🦄", "🚀", "😎"
 
 export default function WhatsAppPro() {
   const [messages, setMessages] = useState<any[]>([]);
-  const [text, setText] = useState(""); // <-- Aquí estaba el error, ahora está arreglado
+  const [text, setText] = useState(""); // <-- LINEA 13 ARREGLADA: Ya no dará error
   const [user, setUser] = useState<any>({ name: "", avatar: "" });
   const [isRegistered, setIsRegistered] = useState(false);
   const [selectedChat, setSelectedChat] = useState("Global");
