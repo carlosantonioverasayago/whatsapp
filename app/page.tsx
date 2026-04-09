@@ -66,18 +66,25 @@ export default function WhatsAppPro() {
 
   useEffect(() => { scrollRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages, selectedChat]);
 
-  const enviar = async (e: any) => {
+   const enviar = async (e: any) => {
     e.preventDefault();
     if (!text.trim()) return;
     const msgEnviar = text;
     setText("");
+    
+    // 1. Enviamos a Supabase
     await supabase.from('messages').insert([{ 
       content: msgEnviar, 
       user_id: user.name, 
       avatar_url: user.avatar,
       receiver_id: selectedChat === "Global" ? null : selectedChat
     }]);
+
+    // 2. TRUCO: Forzamos a la pantalla a mostrar el mensaje de inmediato
+    const { data } = await supabase.from('messages').select('*').order('inserted_at', { ascending: true });
+    if (data) setMessages(data);
   };
+
 
   const logout = () => {
     localStorage.removeItem('chat_profile');
