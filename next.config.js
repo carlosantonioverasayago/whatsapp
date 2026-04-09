@@ -1,13 +1,11 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   typescript: {
-    // !! ADVERTENCIA !!
-    // Permite que los despliegues finalicen con éxito incluso si
-    // tu proyecto tiene errores de TypeScript.
+    // Esto ignora los errores de TypeScript para que te deje publicar
     ignoreBuildErrors: true,
   },
   eslint: {
-    // Ignora los errores de ESLint durante el despliegue
+    // Esto ignora los avisos de "ortografía" del código
     ignoreDuringBuilds: true,
   },
 }
