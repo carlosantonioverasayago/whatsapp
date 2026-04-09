@@ -2,7 +2,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-const SUPABASE_URL = "https://supabase.co"; 
+// TUS CREDENCIALES REALES
+const SUPABASE_URL = "https://bzgqluegvremheryxkqx.supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_u7IpNiA7Ii5WqX-S_AjGQQ_fzSt0xC_";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
@@ -128,14 +129,19 @@ export default function WhatsAppPro() {
           {filteredMessages.map((m: any, i: number) => (
             <div key={i} style={{...styles.bubble, alignSelf: m.user_id === user.name ? 'flex-end' : 'flex-start', backgroundColor: m.user_id === user.name ? '#e7ffdb' : '#fff'}}>
               <small style={{display: 'block', fontSize: '10px', color: '#888'}}>{m.user_id}</small>
-              <p style={{margin: 0}}>{m.content}</p>
+              <p style={{margin: 0, color: '#000'}}>{m.content}</p> {/* LETRAS NEGRAS EN MENSAJES */}
             </div>
           ))}
           <div ref={scrollRef} />
         </main>
         <footer style={styles.footer}>
           <form onSubmit={enviar} style={{display: 'flex', gap: '10px'}}>
-            <input style={styles.input} value={text} onChange={(e: any) => setText(e.target.value)} placeholder="Escribe un mensaje..." />
+            <input 
+              style={styles.input} 
+              value={text} 
+              onChange={(e: any) => setText(e.target.value)} 
+              placeholder="Escribe un mensaje..." 
+            />
             <button style={styles.sendBtn}>➤</button>
           </form>
         </footer>
@@ -155,11 +161,19 @@ const styles: any = {
   chatArea: { flex: 1, overflowY: 'auto', padding: '20px', display: 'flex', flexDirection: 'column' },
   bubble: { padding: '8px 12px', borderRadius: '10px', marginBottom: '8px', maxWidth: '70%', boxShadow: '0 1px 1px rgba(0,0,0,0.1)' },
   footer: { padding: '15px', background: '#f0f0f0' },
-  input: { flex: 1, padding: '12px 15px', borderRadius: '25px', border: '1px solid #ccc', outline: 'none' },
+  input: { 
+    flex: 1, 
+    padding: '12px 15px', 
+    borderRadius: '25px', 
+    border: '1px solid #ccc', 
+    outline: 'none', 
+    color: '#000', // LETRAS NEGRAS AL ESCRIBIR
+    background: '#fff' 
+  },
   sendBtn: { background: '#075e54', color: '#fff', border: 'none', borderRadius: '50%', width: '45px', height: '45px', cursor: 'pointer' },
   setupBg: { height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#075e54' },
   setupCard: { background: 'white', padding: '40px', borderRadius: '20px', textAlign: 'center', width: '90%', maxWidth: '400px' },
-  setupInput: { width: '100%', padding: '12px', marginBottom: '20px', borderRadius: '8px', border: '1px solid #ddd' },
+  setupInput: { width: '100%', padding: '12px', marginBottom: '20px', borderRadius: '8px', border: '1px solid #ddd', color: '#000' },
   avatarGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '15px', marginBottom: '25px' },
   avatarOption: { fontSize: '30px', cursor: 'pointer', padding: '10px' },
   setupBtn: { width: '100%', padding: '15px', background: '#25d366', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 'bold' }
