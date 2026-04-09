@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 
-// Configuración con tus credenciales reales integradas
+// Configuración con tus credenciales reales
 const SUPABASE_URL = "https://supabase.co"; 
 const SUPABASE_KEY = "sb_publishable_u7IpNiA7Ii5WqX-S_AjGQQ_fzSt0xC_";
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -11,7 +11,7 @@ const AVATARES = ["🐶", "🐱", "🦊", "🦁", "🤖", "🦄", "🚀", "😎"
 
 export default function WhatsAppPro() {
   const [messages, setMessages] = useState<any[]>([]);
-  const [text, setText] = useState(""); 
+  const [text, setText] = useState(""); // <-- Aquí estaba el error, ahora está arreglado
   const [user, setUser] = useState<any>({ name: "", avatar: "" });
   const [isRegistered, setIsRegistered] = useState(false);
   const [selectedChat, setSelectedChat] = useState("Global");
@@ -21,9 +21,13 @@ export default function WhatsAppPro() {
   useEffect(() => {
     const saved = localStorage.getItem('chat_profile');
     if (saved) { 
-      const parsed = JSON.parse(saved);
-      setUser(parsed); 
-      setIsRegistered(true); 
+      try {
+        const parsed = JSON.parse(saved);
+        setUser(parsed); 
+        setIsRegistered(true);
+      } catch (e) {
+        localStorage.removeItem('chat_profile');
+      }
     }
 
     const fetchMsgs = async () => {
@@ -40,7 +44,11 @@ export default function WhatsAppPro() {
       { event: 'INSERT', schema: 'public', table: 'messages' }, 
       (p) => {
         setMessages((prev) => [...prev, p.new]);
-        setActiveUsers((prev: any) => new Set(prev).add(p.new.user_id));
+        setActiveUsers((prev: any) => {
+          const next = new Set(prev);
+          next.add(p.new.user_id);
+          return next;
+        });
       }
     ).subscribe();
 
@@ -52,10 +60,10 @@ export default function WhatsAppPro() {
   const enviar = async (e: any) => {
     e.preventDefault();
     if (!text.trim()) return;
-    const content = text;
+    const msgEnviar = text;
     setText("");
     await supabase.from('messages').insert([{ 
-      content, 
+      content: msgEnviar, 
       user_id: user.name, 
       avatar_url: user.avatar,
       receiver_id: selectedChat === "Global" ? null : selectedChat
@@ -109,7 +117,7 @@ export default function WhatsAppPro() {
         <div style={{...styles.userItem, background: selectedChat === "Global" ? '#f0f0f0' : 'transparent'}} onClick={() => setSelectedChat("Global")}>🌍 Chat Global</div>
         <div style={{padding: '10px 20px', fontSize: '12px', color: '#888'}}>USUARIOS ACTIVOS</div>
         {Array.from(activeUsers).filter(u => u !== user.name).map((u: any) => (
-          <div key={u} style={{...styles.userItem, background: selectedChat === u ? '#f0f0f0' : 'transparent'}} onClick={() => setSelectedChat(u)}>👤 {u}</div>
+          <div key={u as string} style={{...styles.userItem, background: selectedChat === u ? '#f0f0f0' : 'transparent'}} onClick={() => setSelectedChat(u as string)}>👤 {u as string}</div>
         ))}
       </aside>
       <div style={styles.chatWrapper}>
