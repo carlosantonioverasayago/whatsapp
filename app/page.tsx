@@ -9,8 +9,8 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 const AVATARES = ["🐶", "🐱", "🦊", "🦁", "🤖", "🦄", "🚀", "😎"];
 
 export default function WhatsAppPro() {
-  // CORRECCIÓN: Añadimos <any[]> para que Vercel no de error
-  const [messages, setMessages] = useState<any[]>([]);
+// Forzamos el tipo 'any' desde el inicio para desactivar la restricción 'never'
+const [messages, setMessages] = useState<any[]>([] as any[]);
   const = useState("");
   const [user, setUser] = useState({ name: "", avatar: "" });
   const [isRegistered, setIsRegistered] = useState(false);
